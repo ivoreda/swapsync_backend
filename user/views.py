@@ -28,7 +28,7 @@ class SignUpView(APIView):
 
 class GetSwapOffersView(APIView):
     serializer_class = serializers.GetSwapOfferSerializer
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
 
     def get(self, request):
         queryset = models.SwapOffers.objects.filter(isAccepted=False)
@@ -67,22 +67,22 @@ class AcceptSwapOfferView(APIView):
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
-        if self.request.user.is_authenticated:
-            swap_offer = models.SwapOffers.objects.get(
-                id=request.data.get('id'))
-            if swap_offer:
-                if swap_offer.offer_maker_id == self.request.user:
-                    return Response({"status": False, "message": "You cannot accept an offer that you made"}, status=status.HTTP_400_BAD_REQUEST)
-                swap_offer.offer_accepter_id = self.request.user
-                swap_offer.offer_accepter_name = self.request.user.username
-                swap_offer.isAccepted = True
-                # when user that made the swap offer send his token
-                # the transaction should be marked as done
-                # add a boolean IsTranxnDone to be marked as done
-                swap_offer.save()
-                return Response({"status": True, "message": "offer created successfully"}, status=status.HTTP_200_OK)
-            if not swap_offer:
-                return Response({"status": False, "message": "Swap offer does not exist"}, status=status.HTTP_400_BAD_REQUEST)
+        # if self.request.user.is_authenticated:
+        swap_offer = models.SwapOffers.objects.get(
+            id=request.data.get('id'))
+        if swap_offer:
+            if swap_offer.offer_maker_id == self.request.user:
+                return Response({"status": False, "message": "You cannot accept an offer that you made"}, status=status.HTTP_400_BAD_REQUEST)
+            swap_offer.offer_accepter_id = self.request.user
+            swap_offer.offer_accepter_name = self.request.user.username
+            swap_offer.isAccepted = True
+            # when user that made the swap offer send his token
+            # the transaction should be marked as done
+            # add a boolean IsTranxnDone to be marked as done
+            swap_offer.save()
+            return Response({"status": True, "message": "offer created successfully"}, status=status.HTTP_200_OK)
+        if not swap_offer:
+            return Response({"status": False, "message": "Swap offer does not exist"}, status=status.HTTP_400_BAD_REQUEST)
 
 class GetUserSwapHistory(APIView):
     serializer_class = serializers.GetSwapOfferSerializer
